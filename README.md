@@ -83,5 +83,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Note: The original Monodepth2 code is subject to Niantic's license terms. See the [license file](LICENSE) for full details.
 
 ## Acknowledgements
+<<<<<<< HEAD
 This work is based on [Monodepth2](https://github.com/nianticlabs/monodepth2) by Godard et al. We thank the authors for their open-source implementation.
 
+=======
+This work is based on [Monodepth2](https://github.com/nianticlabs/monodepth2) by Godard et al. We thank the authors for their open-source implementation.
+>>>>>>> e938cd9 (update readme)

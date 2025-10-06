@@ -11,17 +11,10 @@ from layers import disp_to_depth
 from utils import readlines
 from options import MonodepthOptions
 import datasets
-<<<<<<< HEAD
-import networks.monodepth2
-import networks.litemono
-import os
-import matplotlib.pyplot as plt
-=======
 import networks
 import os
 import matplotlib.pyplot as plt
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
->>>>>>> e938cd9 (update readme)
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
@@ -33,25 +26,26 @@ splits_dir = os.path.join(os.path.dirname(__file__), "splits")
 # to convert our stereo predictions to real-world scale we multiply our depths by 5.4.
 STEREO_SCALE_FACTOR = 5.4
 
-import datetime
-def compute_errors(gt, pred):
+def compute_errors(gt, pred, dynamic_mask):
     """Computation of error metrics between predicted and ground truth depths
     """
+    if dynamic_mask.sum() == 0:
+        return -1
 
     thresh = np.maximum((gt / pred), (pred / gt))
-    a1 = (thresh < 1.25     ).mean()
-    a2 = (thresh < 1.25 ** 2).mean()
-    a3 = (thresh < 1.25 ** 3).mean()
+    a1 = (thresh < 1.25     )[dynamic_mask].mean()
+    a2 = (thresh < 1.25 ** 2)[dynamic_mask].mean()
+    a3 = (thresh < 1.25 ** 3)[dynamic_mask].mean()
 
     rmse = (gt - pred) ** 2
-    rmse = np.sqrt(rmse.mean())
+    rmse = np.sqrt(rmse[dynamic_mask].mean())
 
     rmse_log = (np.log(gt) - np.log(pred)) ** 2
-    rmse_log = np.sqrt(rmse_log.mean())
+    rmse_log = np.sqrt(rmse_log[dynamic_mask].mean())
 
-    abs_rel = np.mean((np.abs(gt - pred) / gt))
+    abs_rel = np.mean((np.abs(gt - pred) / gt)[dynamic_mask])
 
-    sq_rel = np.mean((((gt - pred) ** 2) / gt))
+    sq_rel = np.mean((((gt - pred) ** 2) / gt)[dynamic_mask])
 
     return abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3
 
@@ -72,12 +66,9 @@ def evaluate(opt):
     """
     MIN_DEPTH = 1e-3
     MAX_DEPTH = 80
-<<<<<<< HEAD
-=======
     opt.load_weights_folder = './ablation_models/c8_r0.3/weights_19'
-    #opt.load_weights_folder = './log/mdp/models/weights_19'
-    opt.eval_split = 'eigen'
->>>>>>> e938cd9 (update readme)
+    #opt.load_weights_folder = './ablation_models/mono_640x192'
+    opt.eval_split = 'eigen_benchmark'
 
     assert sum((opt.eval_mono, opt.eval_stereo)) == 1, \
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
@@ -100,31 +91,11 @@ def evaluate(opt):
         dataset = datasets.KITTIRAWDataset(opt.data_path, filenames,
                                            encoder_dict['height'], encoder_dict['width'],
                                            [0], 4, is_train=False, img_ext='.jpg')
-
-        dataloader = DataLoader(dataset, 8, shuffle=False, num_workers=opt.num_workers,
+        dataloader = DataLoader(dataset, 16, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
-<<<<<<< HEAD
-        if opt.base_model not in _MODEL_MODULE_MAP:
-            raise ValueError(
-                f"invalid basic model: {self.base_model}，"
-                f"available models have: {list(_MODEL_MODULE_MAP.keys())}"
-            )
-        networks = importlib.import_module(_MODEL_MODULE_MAP[self.base_model])
-
-        if opt.base_model == 'litemono':
-            encoder = networks.LiteMono(model=opt.model,
-                                        height=encoder_dict['height'],
-                                        width=encoder_dict['width'])
-            depth_decoder = networks.DepthDecoder(encoder.num_ch_enc, scales=range(3))
-
-        elif opt.base_model == 'monodepth2':
-            encoder = networks.ResnetEncoder(opt.num_layers, False)
-            depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
-=======
         encoder = networks.ResnetEncoder(opt.num_layers, False)
         depth_decoder = networks.GADecoder(encoder.num_ch_enc)
->>>>>>> e938cd9 (update readme)
 
         model_dict = encoder.state_dict()
         encoder.load_state_dict({k: v for k, v in encoder_dict.items() if k in model_dict})
@@ -142,30 +113,16 @@ def evaluate(opt):
 
         with torch.no_grad():
             for data in dataloader:
-<<<<<<< HEAD
-                input_color = data[("color", 0, 0)].cuda()
-=======
                 #print(i)
                 input_color = data[("color", 0, 0)].cuda()
-                '''gt_depth = data[('depth_gt')][:, 0]
-                
-                if i == 0:
-                    gt_depth_npy = gt_depth
-                else:
-                    gt_depth_npy = np.concatenate((gt_depth_npy, gt_depth), 0)'''
->>>>>>> e938cd9 (update readme)
 
                 if opt.post_process:
                     # Post-processed results require each image to have two forward passes
                     input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
 
                 features = encoder(input_color)
-<<<<<<< HEAD
-                output = depth_decoder(features, data['obj_mask', 0, 0])
-=======
                 objs_mask = (data['seg', 0, 0] >= 24).float().cuda()
                 output = depth_decoder(features, objs_mask, True)
->>>>>>> e938cd9 (update readme)
 
                 pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
@@ -174,7 +131,7 @@ def evaluate(opt):
                     N = pred_disp.shape[0] // 2
                     pred_disp = batch_post_process_disparity(pred_disp[:N], pred_disp[N:, :, ::-1])
 
-                pred_disps.append(pred_disp)
+                pred_disps.append(np.stack((pred_disp, objs_mask.cpu().numpy()), 1))
 
         pred_disps = np.concatenate(pred_disps)
 
@@ -231,15 +188,16 @@ def evaluate(opt):
 
     errors = []
     ratios = []
-
+    d_ratio = []
     for i in range(pred_disps.shape[0]):
 
         gt_depth = gt_depths[i]
         gt_height, gt_width = gt_depth.shape[:2]
 
-        pred_disp = pred_disps[i]
+        pred_disp = pred_disps[i, 0]
+        dynamic_mask = pred_disps[i, 1]
         pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))
-
+        dynamic_mask = cv2.resize(dynamic_mask, (gt_width, gt_height),interpolation=cv2.INTER_NEAREST)
         pred_depth = 1 / pred_disp
 
         if opt.eval_split == "eigen":
@@ -256,6 +214,9 @@ def evaluate(opt):
 
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]
+        dynamic_mask = dynamic_mask[mask].astype('bool')
+        d_ratio.append(dynamic_mask.sum()/(gt_depth> 0).sum())
+
         pred_depth *= opt.pred_depth_scale_factor
         if not opt.disable_median_scaling:
             ratio = np.median(gt_depth) / np.median(pred_depth)
@@ -265,8 +226,9 @@ def evaluate(opt):
         pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH
         pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH
 
-        error = compute_errors(gt_depth, pred_depth)
-        errors.append(error)
+        error = compute_errors(gt_depth, pred_depth, dynamic_mask)
+        if error != -1:
+            errors.append(error)
 
     if not opt.disable_median_scaling:
         ratios = np.array(ratios)
@@ -274,6 +236,7 @@ def evaluate(opt):
         print(" Scaling ratios | med: {:0.3f} | std: {:0.3f}".format(med, np.std(ratios / med)))
 
     mean_errors = np.array(errors).mean(0)
+    print(np.array(d_ratio).mean())
 
     print("\n  " + ("{:>8} | " * 7).format("abs_rel", "sq_rel", "rmse", "rmse_log", "a1", "a2", "a3"))
     print(("&{: 8.3f}  " * 7).format(*mean_errors.tolist()) + "\\\\")
@@ -282,7 +245,4 @@ def evaluate(opt):
 
 if __name__ == "__main__":
     options = MonodepthOptions()
-    start = datetime.datetime.now()
     evaluate(options.parse())
-    end = datetime.datetime.now()
-    print('totally time is ', end - start)
