@@ -37,7 +37,7 @@ Pretrained models can be downloaded from the following links:
 - [GroundMono (litemono)](https://drive.google.com/file/d/1abZK5w6bx_GWaBH8z_e9MZD66aLq5mTc/view?usp=sharing)
 
 ## Object Mask Dataset for KITTI
-The object mask dataset used in this project can be downloaded from: [coming soon]. This dataset contains semantic segmentation results for all the objects in KITTI sequences, which are extracted by the Mask_RCNN(https://github.com/matterport/Mask_RCNN).
+The object mask dataset used in this project can be downloaded from: [coming soon]. This dataset contains semantic segmentation results for all the objects in KITTI sequences, which are extracted by the [Mask_RCNN](https://github.com/matterport/Mask_RCNN).
 
 
 ## Usage
@@ -52,7 +52,7 @@ Key training parameters:
 - `--data_path`: Path to KITTI dataset root
 - `--split`: Dataset split (e.g., `eigen_zhou`, `benchmark`)
 - `--model_name`: Name for saving training logs and weights
-- '--base_model': Base model architecture for ground propagation (e.g., litemono, monodepth2)
+- `--base_model`: Base model architecture for ground propagation (e.g., litemono, monodepth2)
 
 
 ### Evaluation
@@ -64,7 +64,7 @@ python evaluate.py --data_path /path/to/kitti_dataset --load_weights_folder /pat
 Key evaluation parameters:
 - `--load_weights_folder`: Path to trained model weights
 - `--eval_split`: Evaluation split (e.g., `benchmark`)
-- '--base_model': Base model architecture for ground propagation (e.g., litemono, monodepth2)
+- `--base_model`: Base model architecture for ground propagation (e.g., litemono, monodepth2)
 
 
 ### Prediction for a Single Image
@@ -79,7 +79,7 @@ Parameters:
 - `--load_weights_folder`: Path to trained model weights
 - `--output_path`: Directory to save depth prediction
 - `--pred_depth_format`: Output format (e.g., `png`, `npy`)
-- '--base_model': Base model architecture for ground propagation (e.g., litemono, monodepth2)
+- `--base_model`:  Base model architecture for ground propagation (e.g., litemono, monodepth2)
 
 
 ## License
