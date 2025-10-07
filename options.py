@@ -20,11 +20,7 @@ class MonodepthOptions:
         self.parser.add_argument("--data_path",
                                  type=str,
                                  help="path to the training data",
-<<<<<<< HEAD
                                  default='')
-=======
-                                 default='D:/data/kitti_data')
->>>>>>> e938cd9 (update readme)
         self.parser.add_argument("--log_dir",
                                  type=str,
                                  help="log directory",
@@ -99,11 +95,7 @@ class MonodepthOptions:
         self.parser.add_argument("--batch_size",
                                  type=int,
                                  help="batch size",
-<<<<<<< HEAD
                                  default=12)
-=======
-                                 default=1)
->>>>>>> e938cd9 (update readme)
         self.parser.add_argument("--learning_rate",
                                  type=float,
                                  help="learning rate",
@@ -156,11 +148,7 @@ class MonodepthOptions:
         self.parser.add_argument("--num_workers",
                                  type=int,
                                  help="number of dataloader workers",
-<<<<<<< HEAD
                                  default=12)
-=======
-                                 default=1)
->>>>>>> e938cd9 (update readme)
 
         # LOADING options
         self.parser.add_argument("--load_weights_folder",
@@ -215,12 +203,7 @@ class MonodepthOptions:
         self.parser.add_argument("--eval_eigen_to_benchmark",
                                  help="if set assume we are loading eigen results from npy but "
                                       "we want to evaluate using the new benchmark.",
-<<<<<<< HEAD
                                  action="store_true")
-=======
-                                 default=False)
-                                 #action="store_true")
->>>>>>> e938cd9 (update readme)
         self.parser.add_argument("--eval_out_dir",
                                  help="if set will output the disparities to this folder",
                                  type=str)
@@ -228,10 +211,6 @@ class MonodepthOptions:
                                  help="if set will perform the flipping post processing "
                                       "from the original monodepth paper",
                                  default=False)
-<<<<<<< HEAD
-=======
-                                 #action="store_true")
->>>>>>> e938cd9 (update readme)
 
     def parse(self):
         self.options = self.parser.parse_args()

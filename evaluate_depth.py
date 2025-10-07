@@ -11,17 +11,10 @@ from layers import disp_to_depth
 from utils import readlines
 from options import MonodepthOptions
 import datasets
-<<<<<<< HEAD
 import networks.monodepth2
 import networks.litemono
 import os
 import matplotlib.pyplot as plt
-=======
-import networks
-import os
-import matplotlib.pyplot as plt
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
->>>>>>> e938cd9 (update readme)
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
@@ -72,12 +65,6 @@ def evaluate(opt):
     """
     MIN_DEPTH = 1e-3
     MAX_DEPTH = 80
-<<<<<<< HEAD
-=======
-    opt.load_weights_folder = './ablation_models/c8_r0.3/weights_19'
-    #opt.load_weights_folder = './log/mdp/models/weights_19'
-    opt.eval_split = 'eigen'
->>>>>>> e938cd9 (update readme)
 
     assert sum((opt.eval_mono, opt.eval_stereo)) == 1, \
         "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
@@ -104,7 +91,6 @@ def evaluate(opt):
         dataloader = DataLoader(dataset, 8, shuffle=False, num_workers=opt.num_workers,
                                 pin_memory=True, drop_last=False)
 
-<<<<<<< HEAD
         if opt.base_model not in _MODEL_MODULE_MAP:
             raise ValueError(
                 f"invalid basic model: {self.base_model}，"
@@ -121,10 +107,6 @@ def evaluate(opt):
         elif opt.base_model == 'monodepth2':
             encoder = networks.ResnetEncoder(opt.num_layers, False)
             depth_decoder = networks.DepthDecoder(encoder.num_ch_enc)
-=======
-        encoder = networks.ResnetEncoder(opt.num_layers, False)
-        depth_decoder = networks.GADecoder(encoder.num_ch_enc)
->>>>>>> e938cd9 (update readme)
 
         model_dict = encoder.state_dict()
         encoder.load_state_dict({k: v for k, v in encoder_dict.items() if k in model_dict})
@@ -142,30 +124,14 @@ def evaluate(opt):
 
         with torch.no_grad():
             for data in dataloader:
-<<<<<<< HEAD
                 input_color = data[("color", 0, 0)].cuda()
-=======
-                #print(i)
-                input_color = data[("color", 0, 0)].cuda()
-                '''gt_depth = data[('depth_gt')][:, 0]
-                
-                if i == 0:
-                    gt_depth_npy = gt_depth
-                else:
-                    gt_depth_npy = np.concatenate((gt_depth_npy, gt_depth), 0)'''
->>>>>>> e938cd9 (update readme)
 
                 if opt.post_process:
                     # Post-processed results require each image to have two forward passes
                     input_color = torch.cat((input_color, torch.flip(input_color, [3])), 0)
 
                 features = encoder(input_color)
-<<<<<<< HEAD
                 output = depth_decoder(features, data['obj_mask', 0, 0])
-=======
-                objs_mask = (data['seg', 0, 0] >= 24).float().cuda()
-                output = depth_decoder(features, objs_mask, True)
->>>>>>> e938cd9 (update readme)
 
                 pred_disp, _ = disp_to_depth(output[("disp", 0)], opt.min_depth, opt.max_depth)
                 pred_disp = pred_disp.cpu()[:, 0].numpy()
