@@ -67,21 +67,6 @@ Key evaluation parameters:
 - `--base_model`: Base model architecture for ground propagation (e.g., litemono, monodepth2)
 
 
-### Prediction for a Single Image
-To generate depth prediction for a single image using a trained model:
-```bash
-python predict.py --image_path /path/to/input_image.jpg --load_weights_folder /path/to/trained_weights --output_path /path/to/save_prediction --base_model monodepth2
-
-```
-
-Parameters:
-- `--image_path`: Path to input image
-- `--load_weights_folder`: Path to trained model weights
-- `--output_path`: Directory to save depth prediction
-- `--pred_depth_format`: Output format (e.g., `png`, `npy`)
-- `--base_model`:  Base model architecture for ground propagation (e.g., litemono, monodepth2)
-
-
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

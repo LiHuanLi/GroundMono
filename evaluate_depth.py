@@ -15,6 +15,7 @@ import networks.monodepth2
 import networks.litemono
 import os
 import matplotlib.pyplot as plt
+import importlib
 
 cv2.setNumThreads(0)  # This speeds up evaluation 5x on our unix systems (OpenCV 3.3.1)
 
@@ -103,7 +104,7 @@ def evaluate(opt):
         networks = importlib.import_module(_MODEL_MODULE_MAP[self.base_model])
 
         if opt.base_model == 'litemono':
-            encoder = networks.LiteMono(model=opt.model,
+            encoder = networks.LiteMono(model='litemono',
                                         height=encoder_dict['height'],
                                         width=encoder_dict['width'])
             depth_decoder = networks.DepthDecoder(encoder.num_ch_enc, scales=range(3))
